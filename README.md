@@ -74,3 +74,29 @@ Historical evaluation does not establish current production quality. The default
 forecast follows the latest stored history, not the current clock. Model errors,
 duration estimation, drift and subgroup disparities require review before using
 predictions to make operational or financial decisions.
+
+## Golden Path (clean start to full run)
+
+```powershell
+git clone https://github.com/2026a1c100075-droid/taxi-forecasting-mlops.git
+cd taxi-forecasting-mlops
+py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\run_all.ps1
+```
+
+`run_all.ps1` runs, in order: tests, data pipeline, model training (MLflow),
+batch inference, drift detection, and the responsible-AI analysis. It prints
+`ALL STAGES COMPLETE` on success. Then serve and visualise:
+
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn src.serving.api:app --port 8000
+.\.venv\Scripts\python.exe -m pip install -r requirements-dashboard.txt
+.\.venv\Scripts\python.exe -m streamlit run dashboard/app.py
+```
+
+## CI/CD
+
+GitHub Actions (`.github/workflows/ci.yml`) runs ruff and pytest with coverage on
+every push to `main`. `buildspec.yml` and `infra/terraform/` describe the optional
+AWS CodeBuild/ECS deployment.
